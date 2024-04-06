@@ -1,0 +1,51 @@
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+
+public class Server {
+    public static void main(String[] args) throws IOException {
+        // Create a new HTTP server listening on port 8000
+        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+
+        // Create a context for handling requests
+        server.createContext("/sensor-data", new SensorDataHandler());
+
+        // Start the server
+        server.start();
+
+        System.out.println("Server started on port 8000...");
+    }
+
+    static class SensorDataHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Handle incoming HTTP POST request
+            if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
+                // Read data from the request body
+                StringBuilder requestBody = new StringBuilder();
+                byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = exchange.getRequestBody().read(buffer)) != -1) {
+                    requestBody.append(new String(buffer, 0, bytesRead));
+                }
+
+                // Process the received sensor data
+                String sensorData = requestBody.toString();
+                System.out.println("Received sensor data: " + sensorData);
+
+                // Send a response back to the client
+                String response = "Data received successfully";
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
+            } else {
+                // Return a 405 Method Not Allowed response for unsupported methods
+                exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+}
