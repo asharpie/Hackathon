@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arduino Weather Robot</title>
+    <style>
+        body {
+            font-family: 'San Francisco', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image:
+                linear-gradient(#a18fecf7,#6495ed);
+            
+            
+            .weather-container {
+                box-shadow: 0 4px 4px rgba(0,0,0,0.1);
+                padding: 20px;
+                border-radius: 8px;
+                background-color: white;
+                width: 400px;
+                height: auto; 
+            }
+            #weather p {
+                margin: 10px 0;
+                padding: 0;
+                line-height: 1.5;
+                display: flex;
+                align-items: center;
+            }
+            .icon {
+                margin-right: 10px;
+                font-size: 20px;
+            }
+            .fahrenheit-symbol {
+                color: red;
+            }
+            .celsius-symbol {
+                color: blue;
+            }
+        }
+    </style>
+</head>
+<body> 
+
+    <div class="weather-container">
+        <h1>Arduino Weather Robot</h1>
+        <div id="weather">
+            <p id="tempf"><span class="icon fahrenheit-symbol">&#x1F321;</span>Temperature: -- °F</p>
+            <p id="tempc"><span class="icon celsius-symbol">&#x1F321;</span>Temperature: -- °C</p>
+            <p id="humidity"><span class="icon">&#x1F4A7;</span>Humidity: --%</p>
+            <p id="barometric"><span class="icon">&#x1F327;</span>Barometric Pressure: -- atm</p>
+
+        </div>
+    </div>
+
+    <script>
+        const dataUrl = 'data endpoint url';
+
+        async function fetchData() {
+            try {
+                const response = await fetch(dataUrl);
+                const data = await response.json();
+                document.getElementById('tempf').innerText = `Temperature: ${data.tempf} °F`;
+                document.getElementById('tempc').innerText = `Temperature: ${data.tempc} °C`;
+                document.getElementById('humidity').innerText = `Humidity: ${data.humidity}%`;
+                document.getElementById('barometric').innerText = `Barometric Pressure: ${data.barometric} atm`;
+                if (data.tempf > 110 || data.tempf < -10 || data.tempc > 40 || data.tempc < -34 ) {
+                    print("warning! temperatures are too extreme! sensors may be compromised");
+                }
+            } catch (error) {
+                console.error('Error fetching sensor data:', error);
+            }
+        }
+        fetchData();
+    </script>
+</body>
+</html>
